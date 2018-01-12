@@ -1,13 +1,13 @@
 * set environment paths
-* global DHSDATA   "C:/Users/pizzigo/Documents/dhs"
-* global DATA      "P:/ECB business areas/DGR/Databases and Programme files/DGR/Alessandro Pizzigolotto/dimitris/dhs/data/sets"
-* global PROGRAMS  "P:/ECB business areas/DGR/Databases and Programme files/DGR/Alessandro Pizzigolotto/dimitris/dhs/programs"
-* global GRAPHS    "P:/ECB business areas/DGR/Databases and Programme files/DGR/Alessandro Pizzigolotto/dimitris/dhs/data/graphs"
-
 global DHSDATA  "/Users/dubidub/MEGA/Documents/ECB/Data/dhs"
 global DATA     "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhs/data/sets"
 global PROGRAMS "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhs/programs"
 global GRAPHS   "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhs/data/graphs"
+
+global DHSDATA  "C:/Users/pizzigo/Documents/dhs"
+global DATA     "P:/ECB business areas/DGR/Databases and Programme files/DGR/Alessandro Pizzigolotto/dimitris/dhsmexp/data/sets"
+global PROGRAMS "P:/ECB business areas/DGR/Databases and Programme files/DGR/Alessandro Pizzigolotto/dimitris/dhsmexp/programs"
+global GRAPHS   "P:/ECB business areas/DGR/Databases and Programme files/DGR/Alessandro Pizzigolotto/dimitris/dhsmexp/data/graphs"
 
 global GRAPHFORMAT "pdf"
 
@@ -434,5 +434,5 @@ save "${DATA}/dhs_aggr.dta", replace
 * sdw does not work on my stata
 * do "${PROGRAMS}/sdw64intr.do"
 
-* do "${PROGRAMS}/descMortexp.do"
-* do "${PROGRAMS}/expgrowthMort.do"
+do "${PROGRAMS}/descMortexp.do"
+do "${PROGRAMS}/expgrowthMort.do"

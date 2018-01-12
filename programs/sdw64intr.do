@@ -18,7 +18,7 @@ tsset date
 drop freq
 order date loanstohholds
 
-global DATA "P:/ECB business areas/DGR/Databases and Programme files/DGR/Alessandro Pizzigolotto/dimitris/dhs/data/sets"
+global DATA "P:/ECB business areas/DGR/Databases and Programme files/DGR/Alessandro Pizzigolotto/dimitris/dhsmexp/data/sets"
 
 save "${DATA}/mortrseriesSDW.dta", replace
 
