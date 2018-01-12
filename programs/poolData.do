@@ -1,8 +1,8 @@
 * set environment paths
-global DHSDATA  "/Users/dubidub/MEGA/Documents/ECB/Data/dhs"
-global DATA     "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhs/data/sets"
-global PROGRAMS "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhs/programs"
-global GRAPHS   "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhs/data/graphs"
+global DHSDATA  "/Users/dubidub/MEGA/Documents/ECB/Data/dhsmexp"
+global DATA     "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhsmexp/data/sets"
+global PROGRAMS "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhsmexp/programs"
+global GRAPHS   "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhsmexp/data/graphs"
 
 global DHSDATA  "C:/Users/pizzigo/Documents/dhs"
 global DATA     "P:/ECB business areas/DGR/Databases and Programme files/DGR/Alessandro Pizzigolotto/dimitris/dhsmexp/data/sets"
@@ -20,7 +20,7 @@ global GENWAVES  1
 
 set more off
 
-if $GENWAVES == 1 {
+if $GENWAVES == 0 {
 
     forvalues i = $STARTDATE/$LASTWAVE {
 

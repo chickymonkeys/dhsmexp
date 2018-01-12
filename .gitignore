@@ -52,8 +52,15 @@ ehthumbs.db
 Thumbs.db
 
 # Pathnames #
-######################
-global DHSDATA  "/Users/dubidub/MEGA/Documents/ECB/Data/dhs"
-global DATA     "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhs/data/sets"
-global PROGRAMS "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhs/programs"
-global GRAPHS   "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhs/data/graphs"
+#############
+global DHSDATA  "/Users/dubidub/MEGA/Documents/ECB/Data/dhsmexp"
+global DATA     "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhsmexp/data/sets"
+global PROGRAMS "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhsmexp/programs"
+global GRAPHS   "/Users/dubidub/MEGA/Documents/ECB/Projects/Dimitris/dhsmexp/data/graphs"
+
+# Stata Options #
+#################
+global STARTDATE 2004
+global LASTWAVE  2017
+global GENWAVES  1
+global GENWAVES  0
