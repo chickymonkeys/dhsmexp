@@ -58,32 +58,30 @@ label variable survey "dhs wave"
 
 save "${DATA}/dhs_aggr.dta", replace
 
-local expratelbl : variable label exprate
-local currentratelbl : variable label currentrate
-local realratelbl : variable label realrate
-
+* this creates missing values but it is fine
 generate actgrowth = realrate - currentrate
+label variable actgrowth "percentage points of bank interest rates variation in two years, loans to households for house purchase"
 
-capture drop date
-gen date = mdy(month, 1, survey)
-format date %td
-gen modate = mofd(date)
-format modate %tm
+local expratelbl     : variable label exprate
+local currentratelbl : variable label currentrate
+local realratelbl    : variable label realrate
+local mortexp2ylbl   : variable label mortexp2y
+local actgrowthlbl   : variable label actgrowth
+
+* capture drop date
+* gen date = mdy(month, 1, survey)
+* format date %td
+* gen modate = mofd(date)
+* format modate %tm
 
 * TODO : COMBINE GRAPHS WITH MATRICES
 * i have aggregated yearly data to monthly data where the month was missing
-* could be nice to separate monthly households from 
+* could be nice to separate monthly households from yearly households and
+* to create a factoring error
+
 preserve
-collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(modate)
+collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(survey)
 drop if missing(mortexp2y) == 1 | missing(actgrowth) == 1
-
-
-restore
-
-preserve
-collapse (mean) currentrate exprate realrate (median) currentrate_med = currentrate exprate_med = exprate realrate_med = realrate [pw=wgth], by(survey)
-
-drop if missing(currentrate) == 1 | missing(exprate) == 1 | missing(realrate) == 1
 
 qui sum survey, meanonly
 local minwave = `r(min)'
@@ -91,7 +89,167 @@ local maxwave = `r(max)'
 
 local vardesc1 : variable label survey
 
-twoway line currentrate survey, lwidth(medthick) || line exprate survey, lwidth(medthick) || line realrate survey, lwidth(medthick) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(hor)) subtitle(, size(vsmall)) legend(size(vsmall) symxsize(8) col(1) label(1 "`currentratelbl'") label(2 "`expratelbl'") label(3 "`realratelbl'")) title("Expectations on mortgages interest rates in two years of Dutch households", size(small)) subtitle("by `vardesc1', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))
+twoway line mortexp2y survey, lwidth(medthick) || line actgrowth survey, lwidth(medthick) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(hor)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))
+* graph export "${GRAPHS}/wod52bm_tot.${GRAPHFORMAT}", replace
 
-twoway line currentrate_med survey || line exprate_med survey || line realrate_med survey, lwidth(medthick) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(hor)) subtitle(, size(vsmall)) legend(size(vsmall) symxsize(8) col(1) label(1 "`currentratelbl'") label(2 "`expratelbl'") label(3 "`realratelbl'")) title("Expectations on mortgages interest rates in two years of Dutch households", size(small)) subtitle("by `vardesc1', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))
+twoway line mortexp2y_med survey, lwidth(medthick) || line actgrowth_med survey, lwidth(medthick) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(hor)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))
+* graph export "${GRAPHS}/wod52bmed_tot.${GRAPHFORMAT}", replace
+
+restore
+
+preserve
+collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(incqtile survey)
+drop if missing(mortexp2y) == 1 | missing(actgrowth) == 1
+
+qui sum survey, meanonly
+local minwave = `r(min)'
+local maxwave = `r(max)'
+
+local vardesc1 : variable label survey
+local vardesc2 : variable label incqtile
+
+twoway line mortexp2y survey, lwidth(medthick) || line actgrowth survey, lwidth(medthick) by(incqtile, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bm_inc.${GRAPHFORMAT}", replace
+
+twoway line mortexp2y_med survey, lwidth(medthick) || line actgrowth_med survey, lwidth(medthick) by(incqtile, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bmed_inc.${GRAPHFORMAT}", replace
+restore
+
+preserve
+collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(nwqtile survey)
+drop if missing(mortexp2y) == 1 | missing(actgrowth) == 1
+
+qui sum survey, meanonly
+local minwave = `r(min)'
+local maxwave = `r(max)'
+
+local vardesc1 : variable label survey
+local vardesc2 : variable label nwqtile
+
+twoway line mortexp2y survey, lwidth(medthick) || line actgrowth survey, lwidth(medthick) by(nwqtile, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bm_nw.${GRAPHFORMAT}", replace
+
+twoway line mortexp2y_med survey, lwidth(medthick) || line actgrowth_med survey, lwidth(medthick) by(nwqtile, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bmed_nw.${GRAPHFORMAT}", replace
+
+restore
+
+preserve
+local vardesc2 : variable label age
+
+collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(ageb survey)
+drop if missing(mortexp2y) == 1 | missing(actgrowth) == 1
+
+qui sum survey, meanonly
+local minwave = `r(min)'
+local maxwave = `r(max)'
+
+local vardesc1 : variable label survey
+
+twoway line mortexp2y survey, lwidth(medthick) || line actgrowth survey, lwidth(medthick) by(ageb, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bm_age.${GRAPHFORMAT}", replace
+
+twoway line mortexp2y_med survey, lwidth(medthick) || line actgrowth_med survey, lwidth(medthick) by(ageb, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bmed_age.${GRAPHFORMAT}", replace
+
+restore
+
+preserve
+local vardesc2 : variable label oplzonb
+
+collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(educ survey)
+drop if missing(mortexp2y) == 1 | missing(actgrowth) == 1
+
+qui sum survey, meanonly
+local minwave = `r(min)'
+local maxwave = `r(max)'
+
+local vardesc1 : variable label survey
+
+twoway line mortexp2y survey, lwidth(medthick) || line actgrowth survey, lwidth(medthick) by(educ, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bm_educ.${GRAPHFORMAT}", replace
+
+twoway line mortexp2y_med survey, lwidth(medthick) || line actgrowth_med survey, lwidth(medthick) by(educ, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bmed_educ.${GRAPHFORMAT}", replace
+
+restore
+
+preserve
+collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(empl survey)
+drop if missing(mortexp2y) == 1 | missing(actgrowth) == 1
+
+qui sum survey, meanonly
+local minwave = `r(min)'
+local maxwave = `r(max)'
+
+local vardesc1 : variable label survey
+local vardesc2 : variable label empl
+
+twoway line mortexp2y survey, lwidth(medthick) || line actgrowth survey, lwidth(medthick) by(empl, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bm_empl.${GRAPHFORMAT}", replace
+
+twoway line mortexp2y_med survey, lwidth(medthick) || line actgrowth_med survey, lwidth(medthick) by(empl, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bmed_empl.${GRAPHFORMAT}", replace
+
+restore
+
+preserve
+collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(tenant survey)
+drop if missing(mortexp2y) == 1 | missing(actgrowth) == 1
+
+qui sum survey, meanonly
+local minwave = `r(min)'
+local maxwave = `r(max)'
+
+local vardesc1 : variable label survey
+local vardesc2 : variable label tenant
+
+twoway line mortexp2y survey, lwidth(medthick) || line actgrowth survey, lwidth(medthick) by(tenant, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bm_tenant.${GRAPHFORMAT}", replace
+
+twoway line mortexp2y_med survey, lwidth(medthick) || line actgrowth_med survey, lwidth(medthick) by(tenant, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bmed_tenant.${GRAPHFORMAT}", replace
+
+restore
+
+preserve
+collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(mortowners survey)
+drop if missing(mortexp2y) == 1 | missing(actgrowth) == 1
+
+qui sum survey, meanonly
+local minwave = `r(min)'
+local maxwave = `r(max)'
+
+local vardesc1 : variable label survey
+local vardesc2 : variable label mortowners
+
+twoway line mortexp2y survey, lwidth(medthick) || line actgrowth survey, lwidth(medthick) by(mortowners, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bm_mortown.${GRAPHFORMAT}", replace
+
+twoway line mortexp2y_med survey, lwidth(medthick) || line actgrowth_med survey, lwidth(medthick) by(mortowners, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bmed_mortown.${GRAPHFORMAT}", replace
+
+restore
+
+preserve
+collapse (mean) mortexp2y actgrowth (median) mortexp2y_med = mortexp2y actgrowth_med = actgrowth [pw=wgth], by(housestatus survey)
+drop if missing(mortexp2y) == 1 | missing(actgrowth) == 1
+
+qui sum survey, meanonly
+local minwave = `r(min)'
+local maxwave = `r(max)'
+
+local vardesc1 : variable label survey
+local vardesc2 : variable label housestatus
+
+twoway line mortexp2y survey, lwidth(medthick) || line actgrowth survey, lwidth(medthick) by(housestatus, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', mean percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bm_house.${GRAPHFORMAT}", replace
+
+twoway line mortexp2y_med survey, lwidth(medthick) || line actgrowth_med survey, lwidth(medthick) by(housestatus, title("Expectations on mortgages interest rates' growth in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2', median percent", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017. ECB Statistical Data Warehouse (SDW).", size(vsmall) linegap(*2.5))) ytitle("") xtitle("") yla(#10, labsize(vsmall) angle(hor)) xla(`minwave'(1)`maxwave', labsize(vsmall) angle(45)) legend(size(vsmall) symxsize(8) col(1) label(1 "`mortexp2ylbl'") label(2 "`actgrowthlbl'")) subtitle(, size(vsmall))
+* graph export "${GRAPHS}/wod52bmed_house.${GRAPHFORMAT}", replace
+
+restore
+
+**************************************************************
+
 

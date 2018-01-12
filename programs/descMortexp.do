@@ -38,7 +38,7 @@ local vardesc2 : variable label empl
 local vardesc1 : variable label survey
 
 graph bar mortexpl mortexps mortexph [pw=wgth], over(empl, relabel(1 "Employed" 2 "Self-Employed" 3 "Retired" 4 "Other") label(labsize(tiny) angle(90))) over(survey, label(labsize(vsmall))) stack legend(size(vsmall) symxsize(4) row(1) `legendmortexpi') ytitle("") yla(#10, labsize(vsmall) angle(hor)) title("Expectations on mortgages interest rates in two years of Dutch households", size(small)) subtitle("by `vardesc1' and `vardesc2'", size(vsmall)) note("Source: DNB Household Survey. Years: 2004 - 2017.", size(vsmall) linegap(*2.5))
-graph export "${GRAPHS}/wod52a_educ.${GRAPHFORMAT}", replace
+graph export "${GRAPHS}/wod52a_empl.${GRAPHFORMAT}", replace
 
 local vardesc2 : variable label tenant
 local vardesc1 : variable label survey

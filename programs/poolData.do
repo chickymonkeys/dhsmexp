@@ -276,7 +276,7 @@ if $GENWAVES == 1 {
         replace mortexp2y = (-1)*mortexp2y if missing(wod52b) == 0 & missing(wod52a) == 0 & wod52b > 0 & wod52a == 1
 
         label variable mortexpi   "expectations on mortgages interest rates in two years"
-        label variable mortexp2y  "percentage of expected mortgage interest rates variation in two years"
+        label variable mortexp2y  "percentage points of expected mortgage interest rates variation in two years"
         label variable mortexp10y "expected mortgage interest rates in ten years"
         label values mortexpi wod52a
 
@@ -301,12 +301,21 @@ if $GENWAVES == 1 {
         replace woning = . if woning == -9
         generate tenant = (woning == 2 | woning == 3)
         label variable tenant "the household is a tenant"
+        label define tenantlbl 0 "Non-Tenant" 1 "Tenant"
+        label values tenant tenantlbl
         * are you a houseowner with a mortgage on the main accomodation (poor boy) ?
         bysort nohhold : egen auxm = min(b26hya)
         replace auxm = 0 if missing(auxm) == 1
         generate mortowners = (auxm > 0 & woning == 1)
         label variable mortowners "the household has a mortgage over the owned accomodation"
         generate homeowners = (tenant == 0 & mortowners == 0)
+        generate housestatus = .
+        replace housestatus = 3 if (woning == 2 | woning == 3)
+        replace housestatus = 2 if (auxm > 0 & woning == 1)
+        replace housestatus = 1 if (tenant == 0 & mortowners == 0)
+        label variable housestatus "house status"
+        label define hstatuslbl 1 "house-owner" 2 "house-owner with mortgage" 3 "tenant"
+        label values housestatus hstatuslbl
         drop auxm
 
         * some psychological variables at individual level
